@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="App Kaa Baap helps you discover apps for what you need to do.">
+<title>App Kaa Baap — Every App. One Intelligent Gateway.</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top"><a class="brand" href="#"><span class="logo">A</span><span>App Kaa Baap<small>Every App. One Intelligent Gateway.</small></span></a><span class="pill">MVP PREVIEW</span></header>
+<main>
+<section class="hero">
+<p class="eyebrow">FIND THE RIGHT APP FOR YOUR TASK</p>
+<h1>What do you want<br><em>to get done?</em></h1>
+<p class="sub">Describe your goal in everyday language. Discover apps that can help — without needing to know their names.</p>
+<form id="searchForm" class="search"><span>⌕</span><input id="query" aria-label="Describe what you need" placeholder="e.g. Find cheap bus tickets in India" autocomplete="off"><button>Discover apps ↗</button></form>
+<div class="chips"><button class="chip" data-query="Manage my personal finances">💰 Manage money</button><button class="chip" data-query="Learn a new skill online">🎓 Learn online</button><button class="chip" data-query="Book a bus ticket in India">🚌 Travel</button><button class="chip" data-query="Design social media graphics">🎨 Create designs</button></div>
+<div class="filters"><label>Country <select id="country"><option value="All">All markets</option><option>India</option><option>USA</option></select></label><label>Price <select id="price"><option value="All">Any price</option><option>Free</option><option>Freemium</option><option>Paid</option></select></label><label>Platform <select id="platform"><option value="All">Any platform</option><option>Web</option><option>Android</option><option>iOS</option></select></label></div>
+</section>
+<section class="results"><div class="results-head"><div><p class="eyebrow">YOUR DISCOVERY LIST</p><h2 id="resultTitle">Popular starting points</h2></div><span id="count" class="count"></span></div><p id="notice" class="notice">Demo catalogue — verify current pricing, features and availability on each official site.</p><div id="cards" class="cards"></div>
+</section>
+<section class="developer"><div><p class="eyebrow">FOR APP DEVELOPERS</p><h2>Help people discover your app.</h2><p>Submit an app for review and help us build a useful, trustworthy catalogue.</p></div><form id="devForm"><input required placeholder="App name" aria-label="App name"><input required type="url" placeholder="Official website URL" aria-label="Official website URL"><input required type="email" placeholder="Contact email" aria-label="Contact email"><button type="submit">Prepare submission</button><p id="devMsg" class="formmsg" role="status"></p></form></section>
+</main><footer><span>© 2026 App Kaa Baap</span><span>Independent discovery · Transparent recommendations</span></footer>
+<script src="apps.js"></script><script src="app.js"></script>
+</body></html>
