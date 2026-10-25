@@ -1,4 +1,4 @@
-const MODEL = "gemini-3.5-flash-lite";
+const MODEL = "gpt-6-luna";
 const MAX_QUERY_LENGTH = 500;
 const MAX_APPS = 100;
 
@@ -17,9 +17,9 @@ export async function handler(event) {
     return json(405, { error: "Method not allowed." });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    return json(503, { error: "AI search is not configured yet." });
+    return json(503, { error: "OpenAI search is not configured yet. Add OPENAI_API_KEY to Netlify and redeploy." });
   }
 
   let input;
@@ -93,37 +93,39 @@ ${JSON.stringify(eligibleApps)}`;
 
   let upstream;
   try {
-    upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
+    upstream = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": apiKey
+        "Authorization": "Bearer " + apiKey
       },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.2,
-          maxOutputTokens: 1200
-        }
+        model: MODEL,
+        messages: [
+          { role: "system", content: "You are App Kaa Baap, an independent app discovery advisor. Follow the prompt and catalogue. Output valid JSON only." },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        max_completion_tokens: 1200,
+        temperature: 0.2
       })
     });
   } catch {
-    return json(502, { error: "Could not reach the AI service." });
+    return json(502, { error: "Could not reach OpenAI. Please try again." });
   }
 
   if (!upstream.ok) {
     // Avoid returning provider details that could expose configuration.
     return json(upstream.status === 429 ? 429 : 502, {
       error: upstream.status === 429
-        ? "AI search is busy. Please try again shortly."
-        : "AI search could not complete. Please try again."
+        ? "OpenAI request limit or available credits may have been reached. Check API billing and usage."
+        : "OpenAI search could not complete. Please try again."
     });
   }
 
   try {
     const payload = await upstream.json();
-    const text = payload?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("");
+    const text = payload?.choices?.[0]?.message?.content;
     const result = JSON.parse(text || "{}");
     const allowed = new Map(safeApps.map(a => [a.id, a]));
     const seen = new Set();
@@ -140,6 +142,6 @@ ${JSON.stringify(eligibleApps)}`;
       matches
     });
   } catch {
-    return json(502, { error: "The AI returned an unreadable response. Please try again." });
+    return json(502, { error: "OpenAI returned an unreadable response. Please try again." });
   }
 }
