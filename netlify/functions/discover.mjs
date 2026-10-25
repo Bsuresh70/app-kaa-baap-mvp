@@ -56,14 +56,14 @@ export async function handler(event) {
   // This prevents a freemium app from being returned for a "completely free" request.
   const q = query.toLowerCase();
   let eligibleApps = safeApps;
-  if (/\\b(completely free|totally free|100% free|entirely free|free only|no paid apps?|without paying|no subscription)\\b/.test(q)) {
+  if (/\b(completely free|totally free|100% free|entirely free|free only|no paid apps?|without paying|no subscription)\b/.test(q)) {
     eligibleApps = eligibleApps.filter(app => app.price.toLowerCase() === "free");
   }
-  if (/\\bandroid\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "android"));
-  if (/\\b(ios|iphone|ipad)\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "ios"));
-  if (/\\b(web app|web only|browser|online website)\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "web"));
-  if (/\\bin india\\b|\\bindian\\b|\\bfor india\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.countries.some(c => c.toLowerCase() === "india"));
-  if (/\\bin the usa\\b|\\bin usa\\b|\\bin the united states\\b|\\bfor us users\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.countries.some(c => c.toLowerCase() === "usa"));
+  if (/\bandroid\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "android"));
+  if (/\b(ios|iphone|ipad)\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "ios"));
+  if (/\b(web app|web only|browser|online website)\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "web"));
+  if (/\bin india\b|\bindian\b|\bfor india\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.countries.some(c => c.toLowerCase() === "india"));
+  if (/\bin the usa\b|\bin usa\b|\bin the united states\b|\bfor us users\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.countries.some(c => c.toLowerCase() === "usa"));
 
   if (!eligibleApps.length) {
     return json(200, { summary: "No catalogue app satisfies the explicit constraints in your request. Try relaxing one constraint.", matches: [] });
