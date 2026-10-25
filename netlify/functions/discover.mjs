@@ -95,7 +95,6 @@ export async function handler(event) {
         input: prompt,
         max_output_tokens: 2200,
         reasoning: { effort: "low" },
-        text: { format: { type: "json_object" } }
       })
     });
 
