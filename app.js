@@ -13,10 +13,16 @@ function filteredApps() {
  const country=$("country").value, price=$("price").value, platform=$("platform").value;
  return catalogue.filter(a=>(country==="All"||a.countries.includes(country))&&(price==="All"||a.price===price)&&(platform==="All"||a.platforms.includes(platform)));
 }
+function pricingNote(price) {
+ if (price === "Free") return "Catalogue pricing: Free. Check the official site for any in-app purchases or exceptions.";
+ if (price === "Freemium") return "Catalogue pricing: Free tier with possible paid features. Check current plan limits and subscription terms.";
+ if (price === "Paid") return "Catalogue pricing: Paid. Confirm the current price, billing period and cancellation terms before paying.";
+ return "Pricing details are not available in the catalogue; check the official site.";
+}
 function renderCards(items, query, reasons = {}) {
  $("resultTitle").textContent=query.trim()?"Apps matching your goal":"Popular starting points";
  $("count").textContent=`${items.length} apps`;
- $("cards").innerHTML=items.length?items.map(a=>`<article class="card"><div class="card-top"><span class="appicon">${escapeHTML(a.icon)}</span><span class="tag">${escapeHTML(a.price)}</span></div><h3>${escapeHTML(a.name)}</h3><div class="meta">${escapeHTML(a.category)} · ${a.platforms.map(escapeHTML).join(", ")}</div><p>${escapeHTML(a.description)}</p><p class="reason">${escapeHTML(reasons[a.id] || (query.trim()?"Why it may fit: matches your search terms.":"A catalogue starting point for common tasks."))}</p><a href="${escapeHTML(a.url)}" target="_blank" rel="noopener noreferrer">Visit official website ↗</a></article>`).join(""):`<div class="empty">No catalogue matches yet. Try broader words or change the filters.</div>`;
+ $("cards").innerHTML=items.length?items.map(a=>`<article class="card"><div class="card-top"><span class="appicon">${escapeHTML(a.icon)}</span><span class="tag">${escapeHTML(a.price)}</span></div><h3>${escapeHTML(a.name)}</h3><div class="meta">${escapeHTML(a.category)} · ${a.platforms.map(escapeHTML).join(", ")}</div><p>${escapeHTML(a.description)}</p><p class="pricing-note">${escapeHTML(pricingNote(a.price))}</p><p class="reason">${escapeHTML(reasons[a.id] || (query.trim()?"Why it may fit: matches your search terms.":"A catalogue starting point for common tasks."))}</p><p class="evidence">Evidence status: catalogue-listed; not independently verified.</p><a href="${escapeHTML(a.url)}" target="_blank" rel="noopener noreferrer">Open website / app listing ↗</a></article>`).join(""):`<div class="empty">No catalogue matches yet. Try broader words or change the filters.</div>`;
 }
 function fallbackSearch(apps, query) {
  return apps.map(a=>({...a,score:score(a,query)})).filter(a=>a.score>0).sort((a,b)=>b.score-a.score).slice(0,8);
