@@ -31,7 +31,6 @@ exports.handler = async (event) => {
   const rawApps = Array.isArray(body.apps) ? body.apps.slice(0, MAX_APPS) : [];
 
   if (!query) return json(400, { error: "Please describe what you want to do." });
-  if (!rawApps.length) return json(200, { summary: "No apps match the selected filters. Try changing the filters.", matches: [] });
 
   // Accept only fields used by discovery; never trust model-generated URLs or display markup.
   const apps = rawApps.map((app) => ({
@@ -45,7 +44,6 @@ exports.handler = async (event) => {
     platforms: Array.isArray(app && app.platforms) ? app.platforms.slice(0, 10).map(x => clean(x, 40)) : []
   })).filter(app => app.id && app.name);
 
-  if (!apps.length) return json(200, { summary: "No usable apps were found in the current catalogue.", matches: [] });
 
   // Enforce explicit hard constraints before asking the model to rank candidates.
   // This prevents the model from returning a freemium app for a "completely free" request.
@@ -67,9 +65,6 @@ exports.handler = async (event) => {
     if (credentialApps.length) eligibleApps = credentialApps;
   }
 
-  if (!eligibleApps.length) {
-    return json(200, { summary: "No catalogue app satisfies the explicit constraints in your request. Try relaxing one constraint.", matches: [] });
-  }
 
   const prompt = [
     "You are App Kaa Baap, an independent, user-first app discovery advisor.",
