@@ -19,19 +19,20 @@ function linkLabel(app) {
  return "Visit listed website";
 }
 function verificationNote(app) {
+ if (app.evidenceStatus) return app.evidenceStatus;
  if (app.verificationStatus === "verified" && app.lastVerifiedAt) return `Verified on ${app.lastVerifiedAt}.`;
  return "Not independently verified. Listing URLs, availability and details should be checked before relying on them.";
 }
 function pricingNote(price) {
- if (price === "Free") return "Catalogue pricing: Free. Check the official site for any in-app purchases or exceptions.";
- if (price === "Freemium") return "Catalogue pricing: Free tier with possible paid features. Check current plan limits and subscription terms.";
- if (price === "Paid") return "Catalogue pricing: Paid. Confirm the current price, billing period and cancellation terms before paying.";
- return "Pricing details are not available in the catalogue; check the official site.";
+ if (price === "Free") return "Listed as Free; confirm any in-app purchases or exceptions on the official site.";
+ if (price === "Freemium") return "Free tier with possible paid features; check current plan limits and subscription terms.";
+ if (price === "Paid") return "Listed as Paid; confirm current price, billing period and cancellation terms before paying.";
+ return "Pricing is unknown or may have changed; check the official site before relying on it.";
 }
 function renderCards(items, query, reasons = {}) {
  $("resultTitle").textContent=query.trim()?"Apps matching your goal":"Popular starting points";
  $("count").textContent=`${items.length} apps`;
- $("cards").innerHTML=items.length?items.map(a=>`<article class="card"><div class="card-top"><span class="appicon">${escapeHTML(a.icon)}</span><span class="tag">${escapeHTML(a.price)}</span></div><h3>${escapeHTML(a.name)}</h3><div class="meta">${escapeHTML(a.category)} · ${a.platforms.map(escapeHTML).join(", ")}</div><p>${escapeHTML(a.description)}</p><p class="pricing-note">${escapeHTML(pricingNote(a.price))}</p><p class="reason">${escapeHTML(reasons[a.id] || (query.trim()?"Why it may fit: matches your search terms.":"A catalogue starting point for common tasks."))}</p><p class="evidence">Evidence status: ${escapeHTML(verificationNote(a))}</p><div class="access-links">${a.url?`<a href="${escapeHTML(a.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(linkLabel(a))} ↗</a>`:""}${a.androidListingUrl?`<a href="${escapeHTML(a.androidListingUrl)}" target="_blank" rel="noopener noreferrer">Google Play ↗</a>`:""}${a.iosListingUrl?`<a href="${escapeHTML(a.iosListingUrl)}" target="_blank" rel="noopener noreferrer">Apple App Store ↗</a>`:""}</div></article>`).join(""):`<div class="empty">No catalogue matches yet. Try broader words or change the filters.</div>`;
+ $("cards").innerHTML=items.length?items.map(a=>`<article class="card"><div class="card-top"><span class="appicon">${escapeHTML(a.icon || "🌐")}</span><span class="tag">${escapeHTML(a.price || "Unknown")}</span></div><h3>${escapeHTML(a.name)}</h3><div class="meta">${escapeHTML(a.category || "Digital service")} · ${(Array.isArray(a.platforms)?a.platforms:[]).map(escapeHTML).join(", ") || "Platform unknown"}</div><p>${escapeHTML(a.description || "")}</p><p class="pricing-note">${escapeHTML(pricingNote(a.price || "Unknown"))}</p><p class="reason">${escapeHTML(reasons[a.id] || a.reason || (query.trim()?"Potentially relevant to your goal.":"A catalogue starting point for common tasks."))}</p><p class="evidence">Evidence status: ${escapeHTML(verificationNote(a))}</p><div class="access-links">${a.url?`<a href="${escapeHTML(a.url)}" target="_blank" rel="noopener noreferrer">Visit listed website ↗</a>`:""}${a.androidListingUrl?`<a href="${escapeHTML(a.androidListingUrl)}" target="_blank" rel="noopener noreferrer">Google Play ↗</a>`:""}${a.iosListingUrl?`<a href="${escapeHTML(a.iosListingUrl)}" target="_blank" rel="noopener noreferrer">Apple App Store ↗</a>`:""}${a.sourceUrl?`<a href="${escapeHTML(a.sourceUrl)}" target="_blank" rel="noopener noreferrer">Research source ↗</a>`:""}</div></article>`).join(""):`<div class="empty">No suitable matches found. Try adjusting your filters or describing the need differently.</div>`;
 }
 function fallbackSearch(apps, query) {
  return apps.map(a=>({...a,score:score(a,query)})).filter(a=>a.score>0).sort((a,b)=>b.score-a.score).slice(0,8);
