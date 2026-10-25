@@ -1,10 +1,8 @@
-// Netlify Function: secure Gemini-powered app discovery.
-// Required Netlify environment variable: GEMINI_API_KEY
-// The API key stays on the server and is never sent to the browser.
+// Netlify Function: OpenAI-powered app discovery. API key stays server-side.
 
 const MAX_QUERY_LENGTH = 500;
 const MAX_APPS = 100;
-const MODEL = "gemini-3.5-flash-lite";
+const MODEL = "gpt-6-luna";
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
@@ -15,10 +13,10 @@ exports.handler = async (event) => {
     return json(405, { error: "Method not allowed. Use POST." });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return json(503, {
-      error: "AI discovery is not configured yet. Please add GEMINI_API_KEY to the Netlify environment variables and redeploy."
+      error: "OpenAI discovery is not configured yet. Please add OPENAI_API_KEY to Netlify and redeploy."
     });
   }
 
@@ -90,62 +88,45 @@ exports.handler = async (event) => {
   ].join("\n\n");
 
   try {
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent?key=" + encodeURIComponent(apiKey),
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: "OBJECT",
-              properties: {
-                summary: { type: "STRING" },
-                matches: {
-                  type: "ARRAY",
-                  items: {
-                    type: "OBJECT",
-                    properties: {
-                      id: { type: "STRING" },
-                      reason: { type: "STRING" }
-                    },
-                    required: ["id", "reason"]
-                  }
-                }
-              },
-              required: ["summary", "matches"]
-            }
-          }
-        })
-      }
-    );
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + apiKey
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: "system", content: "You are App Kaa Baap, an independent app discovery advisor. Follow the prompt and catalogue. Output valid JSON only." },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        max_completion_tokens: 1200,
+        temperature: 0.2
+      })
+    });
 
     if (!response.ok) {
       // Keep provider details out of the client response; logs can be checked in Netlify.
-      console.error("Gemini discovery request failed with status", response.status);
+      console.error("OpenAI discovery request failed with status", response.status);
       if (response.status === 400 || response.status === 404) {
-        return json(502, { error: "The configured Gemini model or request was rejected. Check the function logs and model availability in Google AI Studio." });
+        return json(502, { error: "The configured OpenAI model or request was rejected. Check model availability and Netlify function logs." });
       }
       if (response.status === 401 || response.status === 403) {
-        return json(502, { error: "Gemini rejected the API key or its permissions. Check GEMINI_API_KEY in Netlify." });
+        return json(502, { error: "OpenAI rejected the API key or its permissions. Check OPENAI_API_KEY in Netlify." });
       }
-      return json(502, { error: "Gemini is temporarily unavailable. Please try again." });
+      return json(502, { error: "OpenAI is temporarily unavailable. Please try again." });
     }
 
     const result = await response.json();
-    const text = result && result.candidates && result.candidates[0] &&
-      result.candidates[0].content && result.candidates[0].content.parts &&
-      result.candidates[0].content.parts.map(part => part.text || "").join("");
-    if (!text) return json(502, { error: "Gemini returned an empty response. Please try again." });
+    const text = result && result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content;
+    if (!text) return json(502, { error: "OpenAI returned an empty response. Please try again." });
 
     let parsed;
     try {
       parsed = JSON.parse(text);
     } catch {
-      return json(502, { error: "Gemini returned an unreadable response. Please try again." });
+      return json(502, { error: "OpenAI returned an unreadable response. Please try again." });
     }
 
     const allowedIds = new Set(apps.map(app => app.id));
@@ -166,8 +147,8 @@ exports.handler = async (event) => {
       matches
     });
   } catch (error) {
-    console.error("Gemini discovery error:", error && error.message ? error.message : "Unknown error");
-    return json(502, { error: "AI discovery failed temporarily. Please try again." });
+    console.error("OpenAI discovery error:", error && error.message ? error.message : "Unknown error");
+    return json(502, { error: "OpenAI discovery failed temporarily. Please try again." });
   }
 };
 
