@@ -64,6 +64,13 @@ export async function handler(event) {
   if (/\b(web app|web only|browser|online website)\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "web"));
   if (/\bin india\b|\bindian\b|\bfor india\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.countries.some(c => c.toLowerCase() === "india"));
   if (/\bin the usa\b|\bin usa\b|\bin the united states\b|\bfor us users\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.countries.some(c => c.toLowerCase() === "usa"));
+  // Intent guardrail: digital certificates/marksheets should prioritize document credentials, not general government portals.
+  const asksForDigitalCredentials = /\b(digital|online|electronic)?\s*(marksheets?|mark sheets?|certificates?|diplomas?|transcripts?)\b/.test(q) &&
+    /\b(store|access|download|retrieve|manage|keep|save|fetch|find|share|verify|documents?|records?)\b/.test(q);
+  if (asksForDigitalCredentials && !/\b(umang|government services|govt services|service portal)\b/.test(q)) {
+    const credentialApps = eligibleApps.filter(app => /digilocker/i.test(app.name + " " + app.id));
+    if (credentialApps.length) eligibleApps = credentialApps;
+  }
 
   if (!eligibleApps.length) {
     return json(200, { summary: "No catalogue app satisfies the explicit constraints in your request. Try relaxing one constraint.", matches: [] });
