@@ -147,9 +147,9 @@ export async function handler(event) {
         const p = String(m.price || "Unknown");
         if (body.price && body.price !== "All" && p.toLowerCase() !== String(body.price).toLowerCase()) return false;
         const selectedCountry = body.country && body.country !== "All" ? String(body.country) : "";
-        if (selectedCountry && Array.isArray(m.countries) && m.countries.length && !m.countries.includes(selectedCountry)) return false;
+        if (selectedCountry && (!Array.isArray(m.countries) || !m.countries.includes(selectedCountry))) return false;
         const selectedPlatform = body.platform && body.platform !== "All" ? String(body.platform) : "";
-        if (selectedPlatform && Array.isArray(m.platforms) && m.platforms.length && !m.platforms.includes(selectedPlatform)) return false;
+        if (selectedPlatform && (!Array.isArray(m.platforms) || !m.platforms.includes(selectedPlatform))) return false;
         return true;
       })
       .slice(0, 8)
