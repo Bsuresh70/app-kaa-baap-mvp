@@ -107,7 +107,7 @@ ${JSON.stringify(eligibleApps)}`;
         ],
         response_format: { type: "json_object" },
         max_completion_tokens: 1200,
-        temperature: 0.2
+        reasoning_effort: "none"
       })
     });
   } catch {
@@ -115,7 +115,9 @@ ${JSON.stringify(eligibleApps)}`;
   }
 
   if (!upstream.ok) {
-    // Avoid returning provider details that could expose configuration.
+    // Keep the provider error in server logs for diagnosis; never send it to the browser.
+    const providerError = await upstream.text().catch(() => "");
+    console.error("OpenAI discovery request failed:", upstream.status, providerError.slice(0, 1200));
     return json(upstream.status === 429 ? 429 : 502, {
       error: upstream.status === 429
         ? "OpenAI request limit or available credits may have been reached. Check API billing and usage."
