@@ -87,8 +87,21 @@ exports.handler = async (event) => {
     "Catalogue JSON: " + JSON.stringify(eligibleApps)
   ].join("\n\n");
 
+  const prompt = [
+    "You are App Kaa Baap, an independent, user-first app and digital-service discovery researcher.",
+    "Search the live web for useful apps or digital services that solve the user's stated need. Do not restrict discovery to the supplied catalogue. Search broadly enough to find several meaningful options, then rank by task fit, usefulness, evidence quality, price fit and country/platform compatibility.",
+    "Prioritize official product websites, official app-store listings, government websites and reputable documentation. Use official URLs when available. Do not invent products, links, features, prices, country availability or platform support. If price or availability is unclear, say Unknown rather than guessing.",
+    "Never rank based on sponsorship, commission, popularity alone, or developer payments. Do not claim an app is safe, verified, best, or officially endorsed unless supported by sources.",
+    "Use the catalogue as an initial candidate list, not a restriction. Include new discoveries found through web search when relevant. Deduplicate apps. Respect selected country, price and platform filters as hard constraints when evidence supports them; disclose uncertainty instead of making unsupported claims.",
+    "For each result provide name, category, pricing label exactly one of Free, Freemium, Paid, Unknown, countries (array of India and/or USA only when supported), platforms (array from Web, Android, iOS when supported), a short factual description, the official product URL, a source URL used to support the listing, and a concise reason it fits. Include 5–8 strong results if available; fewer is better than padding.",
+    "Use only valid JSON, no markdown, with this shape: " + JSON.stringify({summary:"one sentence",matches:[{id:"stable-short-id",name:"app name",category:"category",price:"Unknown",countries:["India"],platforms:["Web"],description:"factual description",url:"https://official.example",sourceUrl:"https://source.example",reason:"why it fits"}]}),
+    "User request: " + JSON.stringify(query),
+    "Selected filters: " + JSON.stringify({country: body.country || "All", price: body.price || "All", platform: body.platform || "All"}),
+    "Current catalogue candidates: " + JSON.stringify(eligibleApps)
+  ].join("\n\n");
+
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -96,60 +109,75 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: MODEL,
-        messages: [
-          { role: "system", content: "You are App Kaa Baap, an independent app discovery advisor. Follow the prompt and catalogue. Output valid JSON only." },
-          { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" },
-        max_completion_tokens: 1200,
-        reasoning_effort: "none"
+        tools: [{ type: "web_search", search_context_size: "medium" }],
+        tool_choice: "required",
+        input: prompt,
+        max_output_tokens: 2200,
+        reasoning: { effort: "low" },
+        text: { format: { type: "json_object" } }
       })
     });
 
     if (!response.ok) {
-      // Keep provider details out of the client response; logs can be checked in Netlify.
       const providerError = await response.text().catch(() => "");
-      console.error("OpenAI discovery request failed:", response.status, providerError.slice(0, 1200));
-      if (response.status === 400 || response.status === 404) {
-        return json(502, { error: "The configured OpenAI model or request was rejected. Check model availability and Netlify function logs." });
-      }
-      if (response.status === 401 || response.status === 403) {
-        return json(502, { error: "OpenAI rejected the API key or its permissions. Check OPENAI_API_KEY in Netlify." });
-      }
-      return json(502, { error: "OpenAI is temporarily unavailable. Please try again." });
+      console.error("OpenAI live discovery failed:", response.status, providerError.slice(0, 1200));
+      return json(response.status === 429 ? 429 : 502, {
+        error: response.status === 429
+          ? "Live search limit or available API credits may have been reached. Check API usage and billing."
+          : "Live web discovery could not complete. Check the Netlify function logs."
+      });
     }
 
-    const result = await response.json();
-    const text = result && result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content;
-    if (!text) return json(502, { error: "OpenAI returned an empty response. Please try again." });
+    const payload = await response.json();
+    const outputText = payload.output_text || (Array.isArray(payload.output) ? payload.output
+      .filter(item => item.type === "message")
+      .flatMap(item => item.content || [])
+      .filter(part => part.type === "output_text")
+      .map(part => part.text || "")
+      .join("\n") : "");
+    if (!outputText) return json(502, { error: "Live discovery returned no usable results. Please try again." });
 
     let parsed;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      return json(502, { error: "OpenAI returned an unreadable response. Please try again." });
+    try { parsed = JSON.parse(outputText); }
+    catch {
+      console.error("Live discovery returned invalid JSON:", outputText.slice(0, 800));
+      return json(502, { error: "Live discovery returned an unreadable result. Please try again." });
     }
 
-    const allowedIds = new Set(apps.map(app => app.id));
-    const seen = new Set();
     const matches = (Array.isArray(parsed.matches) ? parsed.matches : [])
-      .filter(match => match && typeof match.id === "string" && allowedIds.has(match.id) && !seen.has(match.id))
+      .filter(m => m && typeof m.name === "string" && typeof m.url === "string" && /^https:\/\//i.test(m.url))
+      .filter(m => {
+        const p = String(m.price || "Unknown");
+        if (body.price && body.price !== "All" && p.toLowerCase() !== String(body.price).toLowerCase()) return false;
+        const selectedCountry = body.country && body.country !== "All" ? String(body.country) : "";
+        if (selectedCountry && Array.isArray(m.countries) && m.countries.length && !m.countries.includes(selectedCountry)) return false;
+        const selectedPlatform = body.platform && body.platform !== "All" ? String(body.platform) : "";
+        if (selectedPlatform && Array.isArray(m.platforms) && m.platforms.length && !m.platforms.includes(selectedPlatform)) return false;
+        return true;
+      })
       .slice(0, 8)
-      .map(match => {
-        seen.add(match.id);
-        return {
-          id: match.id,
-          reason: clean(match.reason, 240) || "May be relevant to your request."
-        };
-      });
+      .map((m, index) => ({
+        id: clean(m.id, 100) || ("live-" + index),
+        name: clean(m.name, 120),
+        category: clean(m.category, 80) || "Digital service",
+        price: ["Free","Freemium","Paid","Unknown"].includes(m.price) ? m.price : "Unknown",
+        countries: Array.isArray(m.countries) ? m.countries.filter(c => ["India","USA"].includes(c)) : [],
+        platforms: Array.isArray(m.platforms) ? m.platforms.filter(p => ["Web","Android","iOS"].includes(p)) : [],
+        description: clean(m.description, 500),
+        url: m.url,
+        sourceUrl: typeof m.sourceUrl === "string" && /^https:\/\//i.test(m.sourceUrl) ? m.sourceUrl : "",
+        reason: clean(m.reason, 240) || "Potentially relevant based on live web research.",
+        evidenceStatus: "Web-discovered; review official details before relying on them."
+      }));
 
     return json(200, {
-      summary: clean(parsed.summary, 300) || "Here are the closest matches in the current catalogue.",
+      summary: clean(parsed.summary, 300) || "These options were discovered through live web search; confirm details on official sites.",
+      searchMode: "live_web",
       matches
     });
   } catch (error) {
-    console.error("OpenAI discovery error:", error && error.message ? error.message : "Unknown error");
-    return json(502, { error: "OpenAI discovery failed temporarily. Please try again." });
+    console.error("Live discovery error:", error && error.message ? error.message : "Unknown error");
+    return json(502, { error: "Live web discovery failed temporarily. Please try again." });
   }
 };
 
