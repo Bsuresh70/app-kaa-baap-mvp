@@ -54,9 +54,9 @@ async function render(query="") {
    $("notice").textContent=(data.summary ? data.summary+" " : "")+"Recommendations use only the current catalogue; details and availability are not independently verified. Confirm on official sites.";
  } catch (error) {
    if (requestId !== latestSearch) return;
-   const items = fallbackSearch(apps, query);
-   renderCards(items, query);
-   $("notice").textContent="AI search is temporarily unavailable; showing basic keyword matches instead. "+(error.message || "");
+   renderCards([], query);
+   $("resultTitle").textContent="Unable to make a reliable recommendation";
+   $("notice").textContent="AI search is temporarily unavailable, so we have not shown keyword-based recommendations that may be irrelevant. Please try again later. Technical detail: "+(error.message || "AI service unavailable.");
  }
 }
 function escapeHTML(s){return String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
