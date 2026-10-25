@@ -51,7 +51,7 @@ async function render(query="") {
    const reasons = {};
    const items = (Array.isArray(data.matches)?data.matches:[]).filter(m=>byId.has(m.id)).map(m=>{reasons[m.id]=m.reason;return byId.get(m.id);});
    renderCards(items, query, reasons);
-   $("notice").textContent=(data.summary ? data.summary+" " : "")+"Demo catalogue only — confirm pricing, features and availability on official sites.";
+   $("notice").textContent=(data.summary ? data.summary+" " : "")+"Recommendations use only the current catalogue; details and availability are not independently verified. Confirm on official sites.";
  } catch (error) {
    if (requestId !== latestSearch) return;
    const items = fallbackSearch(apps, query);
