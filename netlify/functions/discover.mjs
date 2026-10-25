@@ -48,10 +48,6 @@ export async function handler(event) {
       platforms: Array.isArray(a.platforms) ? a.platforms.map(String).slice(0, 10) : []
     }));
 
-  if (!safeApps.length) {
-    return json(200, { matches: [], summary: "No apps fit the selected filters in the current starter catalogue." });
-  }
-
   // Enforce explicit hard constraints before asking the model to rank candidates.
   // This prevents a freemium app from being returned for a "completely free" request.
   const q = query.toLowerCase();
@@ -70,10 +66,6 @@ export async function handler(event) {
   if (asksForDigitalCredentials && !/\b(umang|government services|govt services|service portal)\b/.test(q)) {
     const credentialApps = eligibleApps.filter(app => /digilocker/i.test(app.name + " " + app.id));
     if (credentialApps.length) eligibleApps = credentialApps;
-  }
-
-  if (!eligibleApps.length) {
-    return json(200, { summary: "No catalogue app satisfies the explicit constraints in your request. Try relaxing one constraint.", matches: [] });
   }
 
   const prompt = [
