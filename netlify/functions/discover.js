@@ -102,13 +102,14 @@ exports.handler = async (event) => {
         ],
         response_format: { type: "json_object" },
         max_completion_tokens: 1200,
-        temperature: 0.2
+        reasoning_effort: "none"
       })
     });
 
     if (!response.ok) {
       // Keep provider details out of the client response; logs can be checked in Netlify.
-      console.error("OpenAI discovery request failed with status", response.status);
+      const providerError = await response.text().catch(() => "");
+      console.error("OpenAI discovery request failed:", response.status, providerError.slice(0, 1200));
       if (response.status === 400 || response.status === 404) {
         return json(502, { error: "The configured OpenAI model or request was rejected. Check model availability and Netlify function logs." });
       }
