@@ -4,7 +4,7 @@
 
 const MAX_QUERY_LENGTH = 500;
 const MAX_APPS = 100;
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-3.5-flash-lite";
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
