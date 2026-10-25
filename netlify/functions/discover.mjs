@@ -52,6 +52,23 @@ export async function handler(event) {
     return json(200, { matches: [], summary: "No apps fit the selected filters in the current starter catalogue." });
   }
 
+  // Enforce explicit hard constraints before asking the model to rank candidates.
+  // This prevents a freemium app from being returned for a "completely free" request.
+  const q = query.toLowerCase();
+  let eligibleApps = safeApps;
+  if (/\\b(completely free|totally free|100% free|entirely free|free only|no paid apps?|without paying|no subscription)\\b/.test(q)) {
+    eligibleApps = eligibleApps.filter(app => app.price.toLowerCase() === "free");
+  }
+  if (/\\bandroid\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "android"));
+  if (/\\b(ios|iphone|ipad)\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "ios"));
+  if (/\\b(web app|web only|browser|online website)\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.platforms.some(p => p.toLowerCase() === "web"));
+  if (/\\bin india\\b|\\bindian\\b|\\bfor india\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.countries.some(c => c.toLowerCase() === "india"));
+  if (/\\bin the usa\\b|\\bin usa\\b|\\bin the united states\\b|\\bfor us users\\b/.test(q)) eligibleApps = eligibleApps.filter(app => app.countries.some(c => c.toLowerCase() === "usa"));
+
+  if (!eligibleApps.length) {
+    return json(200, { summary: "No catalogue app satisfies the explicit constraints in your request. Try relaxing one constraint.", matches: [] });
+  }
+
   const prompt = `You are App Kaa Baap, an independent, user-first app discovery advisor.
 Your sole objective is to help the user choose apps that best meet their stated needs. User benefit always outranks platform revenue, developer interests, popularity, brand size, or commercial relationships.
 The user wants: ${JSON.stringify(query)}
@@ -63,7 +80,7 @@ Return up to 8 meaningfully relevant matches in best-first order, using exact ca
 Return ONLY valid JSON in this shape:
 {"summary":"one short sentence explaining the selection or limitation","matches":[{"id":"exact-catalogue-id","reason":"short factual reason"}]}
 Catalogue:
-${JSON.stringify(safeApps)}`;
+${JSON.stringify(eligibleApps)}`;
 
   let upstream;
   try {
