@@ -48,7 +48,7 @@ async function render(query="") {
  $("resultTitle").textContent="Understanding your goal…";
  $("count").textContent="Searching";
  $("cards").innerHTML='<div class="empty">AI is matching your request against the current app catalogue…</div>';
- $("notice").textContent="Gemini AI search is using the current starter catalogue. Results are suggestions, not independently verified claims.";
+ $("notice").textContent="Searching the live web and the current catalogue. Results are suggestions; verify details on official sites.";
 
  try {
    const response = await fetch("/.netlify/functions/discover", {
@@ -56,17 +56,19 @@ async function render(query="") {
      headers:{"Content-Type":"application/json"},
      body:JSON.stringify({
        query:query.trim(),
+       country:$("country").value,
+       price:$("price").value,
+       platform:$("platform").value,
        apps:apps.map(({id,name,category,description,keywords,price,countries,platforms})=>({id,name,category,description,keywords,price,countries,platforms}))
      })
    });
    const data = await response.json();
    if (requestId !== latestSearch) return;
    if (!response.ok) throw new Error(data.error || "AI search unavailable");
-   const byId = new Map(apps.map(a=>[a.id,a]));
    const reasons = {};
-   const items = (Array.isArray(data.matches)?data.matches:[]).filter(m=>byId.has(m.id)).map(m=>{reasons[m.id]=m.reason;return byId.get(m.id);});
+   const items = (Array.isArray(data.matches)?data.matches:[]).map(m=>{ if(m && typeof m.name==="string" && typeof m.url==="string"){reasons[m.id]=m.reason||"";return {...m,icon:m.icon||"🌐"};} const found=apps.find(a=>a.id===m.id); if(found) reasons[m.id]=m.reason||""; return found; }).filter(Boolean);
    renderCards(items, query, reasons);
-   $("notice").textContent=(data.summary ? data.summary+" " : "")+"Recommendations use only the current catalogue; details and availability are not independently verified. Confirm on official sites.";
+   $("notice").textContent=(data.summary ? data.summary+" " : "")+"Live web results are not independently verified; confirm features, pricing and availability on official sites.";
  } catch (error) {
    if (requestId !== latestSearch) return;
    renderCards([], query);
