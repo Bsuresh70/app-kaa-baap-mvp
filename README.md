@@ -1,10 +1,18 @@
 # App Kaa Baap — MVP starter
 
-A mobile-friendly app-discovery prototype with country, price and platform filters, a starter catalogue, and Gemini-powered natural-language matching through a server-side Netlify Function.
+A mobile-friendly app and digital-service discovery platform with natural-language search, country/price/platform filters, a starter catalogue, and live web discovery through a server-side Netlify Function.
+
+## How discovery works
+
+- The local catalogue provides initial candidates and useful metadata; it is not intended to be the limit of search.
+- For a user query, the Netlify Function calls the OpenAI Responses API with web search enabled and required. It is instructed to discover relevant apps and services across the live web, including candidates not already in the local catalogue.
+- Results are ranked for task fit and available evidence, and the function returns official product URLs and supporting source URLs when found.
+- Country, price and platform filters are applied to the results. Availability and price can be uncertain, so users should confirm details with official providers.
+- The local catalogue is useful for common searches, fast browsing and fallback context. It should not be treated as a complete directory of apps.
 
 ## Run locally
 
-Open `index.html` in a browser to preview the interface and keyword fallback. The Gemini function requires a Netlify Functions runtime and the environment variable described below.
+Open `index.html` in a browser to preview the interface. Live discovery requires the Netlify Functions runtime and the environment variable below.
 
 ## Deploy to Netlify
 
@@ -12,20 +20,15 @@ Open `index.html` in a browser to preview the interface and keyword fallback. Th
 - Build command: leave blank.
 - Publish directory: `.` (repository root).
 - Functions directory: `netlify/functions` (configured in `netlify.toml`).
-- In Netlify, open **Site configuration → Environment variables** and set `GEMINI_API_KEY` to your Google Gemini API key.
-- Trigger a new deploy after adding or changing the environment variable.
-- Test a natural-language search, the country/price/platform filters, official links, and the developer form.
+- In Netlify, open **Site configuration → Environment variables** and set `OPENAI_API_KEY` to the API key used by the discovery function.
+- Trigger a new deploy after changing the environment variable or function code.
+- Test a natural-language search, country/price/platform filters, result links and the developer form.
 
-## How AI discovery works
+## Security and quality
 
-The browser sends the user's query and the currently filtered catalogue to `/.netlify/functions/discover`. The Netlify Function calls Gemini using the server-side `GEMINI_API_KEY`, validates that returned IDs belong to the submitted catalogue, and returns short match reasons. If AI discovery is unavailable, the interface falls back to basic keyword matching.
-
-**Never put the Gemini API key in `index.html`, `app.js`, or any other browser-delivered file.** Keep it only in Netlify environment variables.
-
-## Current limitations
-
-- The catalogue is a starter sample, not a comprehensive or continuously verified global index.
-- AI matching is limited to the catalogue supplied to the function; it does not yet search the live internet or a global app store index.
+- Never put `OPENAI_API_KEY` in `index.html`, `app.js`, or any browser-delivered file. Keep it only in Netlify environment variables.
+- Live web discovery does not guarantee every app on the internet will be found. Search coverage depends on the search provider's index, query wording, tool limits and available sources.
+- The catalogue is a curated starter set, not a complete or continuously verified global index.
 - The developer form is a front-end demo only and does not submit or store data.
-- Confirm app features, prices, platform support and availability from official sources before production use.
+- Confirm app features, prices, platform support and regional availability on official sources before relying on them.
 - Before public scaling, add rate limiting/abuse controls, monitoring, privacy disclosures, developer submission storage, and catalogue verification workflows.
