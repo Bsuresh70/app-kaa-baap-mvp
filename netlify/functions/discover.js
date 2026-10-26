@@ -1,7 +1,7 @@
 // Netlify Function: OpenAI-powered app discovery. API key stays server-side.
 
 const MAX_QUERY_LENGTH = 500;
-const MAX_APPS = 100;
+const MAX_APPS = 150;
 const MODEL = "gpt-6-luna";
 
 exports.handler = async (event) => {
