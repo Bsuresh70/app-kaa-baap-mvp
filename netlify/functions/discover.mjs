@@ -2,6 +2,8 @@ const MODEL = "gpt-6-luna";
 const MAX_QUERY_LENGTH = 500;
 const MAX_APPS = 100;
 
+const clean = (value, maxLength = 500) => String(value ?? "").replace(/[<>]/g, "").trim().slice(0, maxLength);
+
 const json = (statusCode, body) => ({
   statusCode,
   headers: {
@@ -29,6 +31,7 @@ export async function handler(event) {
     return json(400, { error: "Please send a valid search request." });
   }
 
+  const body = input;
   const query = typeof input.query === "string" ? input.query.trim() : "";
   if (!query || query.length > MAX_QUERY_LENGTH) {
     return json(400, { error: "Enter a search of 1–500 characters." });
