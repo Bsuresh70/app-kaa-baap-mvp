@@ -17,7 +17,7 @@ export async function handler(event) {
   const filters={country:body.country||"All",price:body.price||"All",platform:body.platform||"All"};
   const compareIntent=/\b(compare|comparison|versus|vs\.?|side[- ]by[- ]side|which is better)\b/i.test(query);
   const queryCountry=/\b(in india|indian|for india)\b/i.test(query)?"India":/\b(in the usa|in usa|in the united states|for us users)\b/i.test(query)?"USA":"All";
-  const queryPrice=/\b(completely free|totally free|100% free|entirely free|free only|no paid apps?|without paying)\b/i.test(query)?"Free":"All";
+  const queryPrice=/\b(completely free|totally free|100% free|entirely free|free only|free apps?|free options?|no paid apps?|without paying)\b/i.test(query)?"Free":"All";
   const queryPlatform=/\bandroid\b/i.test(query)?"Android":/\b(ios|iphone|ipad)\b/i.test(query)?"iOS":/\b(web app|web only|browser-based)\b/i.test(query)?"Web":"All";
   const effectiveFilters={country:filters.country!=="All"?filters.country:queryCountry,price:filters.price!=="All"?filters.price:queryPrice,platform:filters.platform!=="All"?filters.platform:queryPlatform};
   const prompt=[
@@ -28,7 +28,7 @@ export async function handler(event) {
     compareIntent ? "This is a comparison request. Return a comparison array with one row per returned app and exact appId matching that app's id. Each row must contain bestFor, freeFeatures, aiTools, watermarks, easeOfUse, limitations. Compare only the apps in matches. If a feature cannot be established, write Not confirmed. Do not mention apps outside matches in any field or in summary." : "This is not necessarily a comparison request. Return comparison as an empty array.",
     "Use only valid JSON in this shape: "+JSON.stringify({matches:[{id:"stable-id",name:"App",category:"Design",price:"Unknown",priceEvidence:"Not confirmed",countries:["India"],platforms:["Android"],description:"Factual description",url:"https://official.example",androidListingUrl:"https://play.google.com/store/apps/details?id=...",iosListingUrl:"",sourceUrl:"https://source.example",reason:"Why it fits"}],comparison:[{appId:"stable-id",bestFor:"...",freeFeatures:"...",aiTools:"...",watermarks:"...",easeOfUse:"...",limitations:"..."}]}),
     "User's exact request: "+JSON.stringify(query),
-    "Selected filters (hard constraints): "+JSON.stringify(filters),
+    "Effective hard constraints (selected filters plus explicit query requirements): "+JSON.stringify(effectiveFilters),
     "Catalogue candidates (starting points only; discover beyond these): "+JSON.stringify(apps)
   ].join("\n\n");
   try {
@@ -41,7 +41,7 @@ export async function handler(event) {
       const price=["Free","Freemium","Paid","Unknown"].includes(m.price)?m.price:"Unknown";
       const platforms=Array.isArray(m.platforms)?m.platforms.filter(x=>["Web","Android","iOS"].includes(x)):[];
       const countries=Array.isArray(m.countries)?m.countries.filter(x=>["India","USA"].includes(x)):[];
-      return {id:clean(m.id,100)||"live-"+index,name:clean(m.name,120),category:clean(m.category,80)||"Digital service",price,priceEvidence:clean(m.priceEvidence,220),countries,platforms,description:clean(m.description,450),url:httpsUrl(m.url),androidListingUrl:httpsUrl(m.androidListingUrl),iosListingUrl:httpsUrl(m.iosListingUrl),sourceUrl:httpsUrl(m.sourceUrl),reason:clean(m.reason,260),evidenceStatus:"Web-discovered; sources are linked where available, but details have not been independently audited."};
+      return {id:clean(m.id,100)||"live-"+index,name:clean(m.name,120),category:clean(m.category,80)||"Digital service",price,priceEvidence:clean(m.priceEvidence,220),countries,platforms,description:clean(m.description,450),url:httpsUrl(m.url),androidListingUrl:httpsUrl(m.androidListingUrl),iosListingUrl:httpsUrl(m.iosListingUrl),sourceUrl:httpsUrl(m.sourceUrl),reason:clean(m.reason,260),evidenceStatus: m.androidListingUrl && httpsUrl(m.androidListingUrl) ? "Google Play listing link supplied; listing contents and availability have not been independently audited." : m.iosListingUrl && httpsUrl(m.iosListingUrl) ? "Apple App Store listing link supplied; listing contents and availability have not been independently audited." : m.sourceUrl && httpsUrl(m.sourceUrl) ? "Research source supplied; details have not been independently audited." : "No independently audited source available."};
     }).filter(m=>m.url||m.androidListingUrl||m.iosListingUrl);
     if(effectiveFilters.price!=="All")matches=matches.filter(m=>m.price===effectiveFilters.price);
     if(effectiveFilters.country!=="All")matches=matches.filter(m=>m.countries.includes(effectiveFilters.country));
