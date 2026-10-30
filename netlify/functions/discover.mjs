@@ -16,9 +16,9 @@ export async function handler(event) {
   const apps=(Array.isArray(body.apps)?body.apps:[]).slice(0,MAX_APPS).filter(a=>a&&typeof a.id==="string"&&typeof a.name==="string").map(a=>({id:clean(a.id,100),name:clean(a.name,120),category:clean(a.category,100),description:clean(a.description,300),keywords:clean(a.keywords,300),price:clean(a.price,40),countries:Array.isArray(a.countries)?a.countries.map(x=>clean(x,30)).slice(0,10):[],platforms:Array.isArray(a.platforms)?a.platforms.map(x=>clean(x,20)).slice(0,10):[]}));
   const filters={country:body.country||"All",price:body.price||"All",platform:body.platform||"All"};
   const compareIntent=/\b(compare|comparison|versus|vs\.?|side[- ]by[- ]side|which is better)\b/i.test(query);
-  const queryCountry=/\\b(in india|indian|for india)\\b/i.test(query)?"India":/\\b(in the usa|in usa|in the united states|for us users)\\b/i.test(query)?"USA":"All";
-  const queryPrice=/\\b(completely free|totally free|100% free|entirely free|free only|no paid apps?|without paying)\\b/i.test(query)?"Free":"All";
-  const queryPlatform=/\\bandroid\\b/i.test(query)?"Android":/\\b(ios|iphone|ipad)\\b/i.test(query)?"iOS":/\\b(web app|web only|browser-based)\\b/i.test(query)?"Web":"All";
+  const queryCountry=/\b(in india|indian|for india)\b/i.test(query)?"India":/\b(in the usa|in usa|in the united states|for us users)\b/i.test(query)?"USA":"All";
+  const queryPrice=/\b(completely free|totally free|100% free|entirely free|free only|no paid apps?|without paying)\b/i.test(query)?"Free":"All";
+  const queryPlatform=/\bandroid\b/i.test(query)?"Android":/\b(ios|iphone|ipad)\b/i.test(query)?"iOS":/\b(web app|web only|browser-based)\b/i.test(query)?"Web":"All";
   const effectiveFilters={country:filters.country!=="All"?filters.country:queryCountry,price:filters.price!=="All"?filters.price:queryPrice,platform:filters.platform!=="All"?filters.platform:queryPlatform};
   const prompt=[
     "You are App Kaa Baap, an independent app discovery researcher. Search the live web; do not invent apps, links, features, prices or availability.",
