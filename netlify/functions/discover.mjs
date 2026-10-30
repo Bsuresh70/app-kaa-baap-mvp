@@ -46,9 +46,13 @@ export async function handler(event) {
     if(effectiveFilters.price!=="All")matches=matches.filter(m=>m.price===effectiveFilters.price);
     if(effectiveFilters.country!=="All")matches=matches.filter(m=>m.countries.includes(effectiveFilters.country));
     if(effectiveFilters.platform!=="All")matches=matches.filter(m=>m.platforms.includes(effectiveFilters.platform));
-    matches=matches.slice(0,8);
-    const ids=new Set(matches.map(m=>m.id));
-    const comparison=compareIntent&&matches.length>=2?(Array.isArray(parsed.comparison)?parsed.comparison:[]).filter(row=>row&&ids.has(row.appId)).map(row=>({appId:row.appId,bestFor:clean(row.bestFor,180),freeFeatures:clean(row.freeFeatures,220),aiTools:clean(row.aiTools,180),watermarks:clean(row.watermarks,180),easeOfUse:clean(row.easeOfUse,160),limitations:clean(row.limitations,220)})):[];
+    const seenNames=new Set();
+    matches=matches.filter(m=>{const key=m.name.toLowerCase();if(seenNames.has(key))return false;seenNames.add(key);return true;}).slice(0,8);
+    const suppliedRows=Array.isArray(parsed.comparison)?parsed.comparison:[];
+    const comparison=compareIntent&&matches.length>=2?matches.map(app=>{
+      const row=suppliedRows.find(item=>item&&item.appId===app.id)||{};
+      return {appId:app.id,bestFor:clean(row.bestFor,180)||"Not confirmed",freeFeatures:clean(row.freeFeatures,220)||"Not confirmed",aiTools:clean(row.aiTools,180)||"Not confirmed",watermarks:clean(row.watermarks,180)||"Not confirmed",easeOfUse:clean(row.easeOfUse,160)||"Not confirmed",limitations:clean(row.limitations,220)||"Not confirmed"};
+    }):[];
     return json(200,{searchMode:"live_web",matches,comparison});
   } catch(error){console.error("Live discovery failed",error&&error.message?error.message:"Unknown error");return json(502,{error:"Live web discovery failed temporarily. Please try again."});}
 }
