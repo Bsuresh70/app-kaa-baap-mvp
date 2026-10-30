@@ -16,6 +16,10 @@ export async function handler(event) {
   const apps=(Array.isArray(body.apps)?body.apps:[]).slice(0,MAX_APPS).filter(a=>a&&typeof a.id==="string"&&typeof a.name==="string").map(a=>({id:clean(a.id,100),name:clean(a.name,120),category:clean(a.category,100),description:clean(a.description,300),keywords:clean(a.keywords,300),price:clean(a.price,40),countries:Array.isArray(a.countries)?a.countries.map(x=>clean(x,30)).slice(0,10):[],platforms:Array.isArray(a.platforms)?a.platforms.map(x=>clean(x,20)).slice(0,10):[]}));
   const filters={country:body.country||"All",price:body.price||"All",platform:body.platform||"All"};
   const compareIntent=/\b(compare|comparison|versus|vs\.?|side[- ]by[- ]side|which is better)\b/i.test(query);
+  const queryCountry=/\\b(in india|indian|for india)\\b/i.test(query)?"India":/\\b(in the usa|in usa|in the united states|for us users)\\b/i.test(query)?"USA":"All";
+  const queryPrice=/\\b(completely free|totally free|100% free|entirely free|free only|no paid apps?|without paying)\\b/i.test(query)?"Free":"All";
+  const queryPlatform=/\\bandroid\\b/i.test(query)?"Android":/\\b(ios|iphone|ipad)\\b/i.test(query)?"iOS":/\\b(web app|web only|browser-based)\\b/i.test(query)?"Web":"All";
+  const effectiveFilters={country:filters.country!=="All"?filters.country:queryCountry,price:filters.price!=="All"?filters.price:queryPrice,platform:filters.platform!=="All"?filters.platform:queryPlatform};
   const prompt=[
     "You are App Kaa Baap, an independent app discovery researcher. Search the live web; do not invent apps, links, features, prices or availability.",
     "Return only useful products that genuinely address the user's need. Prefer official provider pages, Google Play and Apple App Store listings. Return fewer results rather than padding. Do not call any item independently verified merely because you found a URL.",
@@ -39,9 +43,9 @@ export async function handler(event) {
       const countries=Array.isArray(m.countries)?m.countries.filter(x=>["India","USA"].includes(x)):[];
       return {id:clean(m.id,100)||"live-"+index,name:clean(m.name,120),category:clean(m.category,80)||"Digital service",price,priceEvidence:clean(m.priceEvidence,220),countries,platforms,description:clean(m.description,450),url:httpsUrl(m.url),androidListingUrl:httpsUrl(m.androidListingUrl),iosListingUrl:httpsUrl(m.iosListingUrl),sourceUrl:httpsUrl(m.sourceUrl),reason:clean(m.reason,260),evidenceStatus:"Web-discovered; sources are linked where available, but details have not been independently audited."};
     }).filter(m=>m.url||m.androidListingUrl||m.iosListingUrl);
-    if(filters.price!=="All")matches=matches.filter(m=>m.price===filters.price);
-    if(filters.country!=="All")matches=matches.filter(m=>m.countries.includes(filters.country));
-    if(filters.platform!=="All")matches=matches.filter(m=>m.platforms.includes(filters.platform));
+    if(effectiveFilters.price!=="All")matches=matches.filter(m=>m.price===effectiveFilters.price);
+    if(effectiveFilters.country!=="All")matches=matches.filter(m=>m.countries.includes(effectiveFilters.country));
+    if(effectiveFilters.platform!=="All")matches=matches.filter(m=>m.platforms.includes(effectiveFilters.platform));
     matches=matches.slice(0,8);
     const ids=new Set(matches.map(m=>m.id));
     const comparison=compareIntent&&matches.length>=2?(Array.isArray(parsed.comparison)?parsed.comparison:[]).filter(row=>row&&ids.has(row.appId)).map(row=>({appId:row.appId,bestFor:clean(row.bestFor,180),freeFeatures:clean(row.freeFeatures,220),aiTools:clean(row.aiTools,180),watermarks:clean(row.watermarks,180),easeOfUse:clean(row.easeOfUse,160),limitations:clean(row.limitations,220)})):[];
