@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">App Kaa Baap</title>
+  <desc id="desc">A smartphone bringing many app symbols together around a crowned A.</desc>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#123d83"/><stop offset="1" stop-color="#071735"/></linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#12c8f4"/><stop offset=".55" stop-color="#0879e8"/><stop offset="1" stop-color="#173eae"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0a6"/><stop offset=".48" stop-color="#ffc43d"/><stop offset="1" stop-color="#e98b12"/></linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#eaf3ff"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#020b20" flood-opacity=".32"/></filter>
+  </defs>
+  <rect x="3" y="3" width="154" height="154" rx="35" fill="url(#tile)"/>
+  <rect x="3.8" y="3.8" width="152.4" height="152.4" rx="34" fill="none" stroke="#4b8fe7" stroke-opacity=".45" stroke-width="1.5"/>
+  <!-- app tiles flowing toward the single destination -->
+  <g filter="url(#shadow)">
+    <rect x="12" y="47" width="25" height="25" rx="7" fill="#f39b24"/>
+    <path d="M18 54h3l2 9h8l2-6h-10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="19" y="79" width="25" height="25" rx="7" fill="#e94c69"/>
+    <path d="M25 91l4-4 4 4-4 4z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="12" y="111" width="25" height="25" rx="7" fill="#14a982"/>
+    <path d="M18 129v-7l5-4 5 3 4-5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <path d="M38 59C48 58 48 63 55 68M44 91C49 91 50 89 55 87M38 123C48 120 49 112 56 107" fill="none" stroke="url(#gold)" stroke-width="2.4" stroke-linecap="round"/>
+  <!-- phone -->
+  <g filter="url(#shadow)">
+    <rect x="51" y="35" width="91" height="105" rx="17" fill="#07152e" stroke="#57b8ff" stroke-width="2.2"/>
+    <rect x="56" y="41" width="81" height="93" rx="12" fill="url(#screen)"/>
+    <rect x="85" y="45" width="24" height="3" rx="1.5" fill="#8ba6c9"/>
+    <!-- crown -->
+    <path d="M82 62l-8-10 2 14 9-3 8 7 8-7 9 3 2-14-8 10-11-7z" fill="url(#gold)" stroke="#e99a1b" stroke-width="1"/>
+    <path d="M82 68h28l-3 5H85z" fill="url(#gold)"/>
+    <!-- stylized A -->
+    <path d="M75 112l15-31c2-4 7-4 9 0l15 31h-11l-9-20-9 20z" fill="url(#blue)"/>
+    <path d="M82 100c12-7 23-7 37 0" fill="none" stroke="url(#gold)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M88 112h17" stroke="#0b54bd" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <circle cx="128" cy="27" r="3" fill="#ffd46a"/>
+  <path d="M122 18l3-4M136 34l5 1" stroke="#ffd46a" stroke-width="2" stroke-linecap="round"/>
+</svg>
