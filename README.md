@@ -36,6 +36,7 @@ Use the Netlify CLI/local development server so the site runs on a valid localho
 - Functions directory: `netlify/functions` (configured in `netlify.toml`).
 - In Netlify, open **Site configuration → Environment variables** and set `OPENAI_API_KEY` to the API key used by the discovery function.
 - Trigger a new deploy after changing environment variables or function code.
+- For pull-request testing, keep `main` as the production branch, add the pull request's target branch under **Branches and deploy contexts → Branch deploys**, and leave **Deploy Previews** enabled. Netlify should then create a separate preview for pull requests targeting that branch; do not manually deploy the production project when you only intend to test a feature branch.
 
 ## Security and quality
 
