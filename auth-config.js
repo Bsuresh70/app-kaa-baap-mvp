@@ -1,7 +1,7 @@
 // Supabase public client configuration.
-// Replace these two values with your Supabase Project URL and publishable/anon key.
-// These are public browser values; NEVER put a service_role key or Google client secret here.
+// These values are intended for browser use. NEVER put a service_role key
+// or Google client secret here.
 window.APP_AUTH_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: ""
+  supabaseUrl: "https://etneuwrtprqndsqwaeje.supabase.co",
+  supabaseAnonKey: "sb_publishable_v_dQcP7YF78TJSOmM-ejgQ_ygYrledA"
 };
