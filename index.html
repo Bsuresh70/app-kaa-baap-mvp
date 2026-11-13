@@ -7,7 +7,20 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="top"><a class="brand" href="#"><span class="logo">A</span><span>App Kaa Baap<small>Every App. One Intelligent Gateway.</small></span></a><span class="pill">MVP PREVIEW</span></header>
+<header class="top"><a class="brand" href="#"><span class="logo">A</span><span>App Kaa Baap<small>Every App. One Intelligent Gateway.</small></span></a><div class="account-area"><span class="pill">MVP PREVIEW</span><button id="accountButton" class="account-button" type="button">Sign in</button></div></header>
+<section id="loginDialog" class="login-overlay" hidden aria-labelledby="loginTitle" aria-modal="true" role="dialog">
+  <div class="login-panel">
+    <button id="closeLogin" class="close-login" type="button" aria-label="Close sign-in">×</button>
+    <div class="login-mark">A</div>
+    <p class="eyebrow">WELCOME TO APP KAA BAAP</p>
+    <h2 id="loginTitle">One need. One search.</h2>
+    <p class="login-copy">Sign in to keep your App Kaa Baap experience connected across visits.</p>
+    <button id="googleSignIn" class="google-button" type="button"><span class="google-g" aria-hidden="true">G</span>Continue with Google</button>
+    <p id="authMessage" class="auth-message" role="status" aria-live="polite"></p>
+    <button id="continueGuest" class="guest-button" type="button">Continue as guest</button>
+    <p class="login-privacy">We receive your basic Google profile information. We never ask for or store your Google password.</p>
+  </div>
+</section>
 <main>
 <section class="hero">
 <p class="eyebrow">FIND THE RIGHT APP FOR YOUR TASK</p>
@@ -21,5 +34,5 @@
 </section>
 <section class="developer"><div><p class="eyebrow">FOR APP DEVELOPERS</p><h2>Help people discover your app.</h2><p>Submit an app for review and help us build a useful, trustworthy catalogue.</p></div><form id="devForm"><input required placeholder="App name" aria-label="App name"><input required type="url" placeholder="Official website URL" aria-label="Official website URL"><input required type="email" placeholder="Contact email" aria-label="Contact email"><button type="submit">Prepare submission</button><p id="devMsg" class="formmsg" role="status"></p></form></section>
 </main><footer><span>© 2026 App Kaa Baap</span><span>Independent discovery · Transparent recommendations</span></footer>
-<script src="apps.js"></script><script src="app.js"></script>
+<script src="auth-config.js"></script><script src="apps.js"></script><script src="app.js"></script><script type="module" src="auth.js"></script>
 </body></html>
