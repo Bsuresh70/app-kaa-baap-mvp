@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="top"><a class="brand" href="#"><span class="logo">A</span><span>App Kaa Baap<small>Every App. One Intelligent Gateway.</small></span></a><div class="account-area"><span class="pill">MVP PREVIEW</span><button id="accountButton" class="account-button" type="button">Sign in</button></div></header>
+<header class="top"><a class="brand" href="#"><span class="logo">A</span><span>App Kaa Baap<small>Every App. One Intelligent Gateway.</small></span></a><div class="account-area"><span class="pill">MVP PREVIEW</span><button id="profileButton" class="account-button profile-button" type="button" hidden>My preferences</button><button id="accountButton" class="account-button" type="button">Sign in</button></div></header>
 <section id="loginDialog" class="login-overlay" hidden aria-labelledby="loginTitle" aria-modal="true" role="dialog">
   <div class="login-panel">
     <button id="closeLogin" class="close-login" type="button" aria-label="Close sign-in">×</button>
@@ -19,6 +19,34 @@
     <p id="authMessage" class="auth-message" role="status" aria-live="polite"></p>
     <button id="continueGuest" class="guest-button" type="button">Continue as guest</button>
     <p class="login-privacy">We receive your basic Google profile information. We never ask for or store your Google password.</p>
+  </div>
+</section>
+<section id="profileDialog" class="login-overlay" hidden aria-labelledby="profileTitle" aria-modal="true" role="dialog">
+  <div class="profile-panel">
+    <button id="closeProfile" class="close-login" type="button" aria-label="Close preferences">×</button>
+    <p class="eyebrow">YOUR APP KAA BAAP PROFILE</p>
+    <h2 id="profileTitle">Personalise your discovery</h2>
+    <p class="login-copy">Choose what matters to you. You can change these preferences any time.</p>
+    <form id="profileForm">
+      <label class="profile-label">Preferred app categories</label>
+      <div class="category-options">
+        <label><input type="checkbox" name="category" value="Education & Learning"> Education & Learning</label>
+        <label><input type="checkbox" name="category" value="Business & Productivity"> Business & Productivity</label>
+        <label><input type="checkbox" name="category" value="Finance & Payments"> Finance & Payments</label>
+        <label><input type="checkbox" name="category" value="Health & Fitness"> Health & Fitness</label>
+        <label><input type="checkbox" name="category" value="Travel & Transport"> Travel & Transport</label>
+        <label><input type="checkbox" name="category" value="Shopping & Food"> Shopping & Food</label>
+        <label><input type="checkbox" name="category" value="Entertainment & Media"> Entertainment & Media</label>
+        <label><input type="checkbox" name="category" value="Design & Creativity"> Design & Creativity</label>
+        <label><input type="checkbox" name="category" value="Technology & AI"> Technology & AI</label>
+      </div>
+      <label class="profile-label" for="preferredCountry">Preferred market</label>
+      <select id="preferredCountry"><option value="India">India</option><option value="USA">USA</option><option value="All">All markets</option></select>
+      <label class="profile-label" for="preferredLanguage">Preferred language</label>
+      <select id="preferredLanguage"><option value="English">English</option><option value="Telugu">Telugu</option><option value="Hindi">Hindi</option></select>
+      <p id="profileMessage" class="auth-message" role="status" aria-live="polite"></p>
+      <div class="profile-actions"><button class="save-preferences" type="submit">Save preferences</button></div>
+    </form>
   </div>
 </section>
 <main>
@@ -34,5 +62,5 @@
 </section>
 <section class="developer"><div><p class="eyebrow">FOR APP DEVELOPERS</p><h2>Help people discover your app.</h2><p>Submit an app for review and help us build a useful, trustworthy catalogue.</p></div><form id="devForm"><input required placeholder="App name" aria-label="App name"><input required type="url" placeholder="Official website URL" aria-label="Official website URL"><input required type="email" placeholder="Contact email" aria-label="Contact email"><button type="submit">Prepare submission</button><p id="devMsg" class="formmsg" role="status"></p></form></section>
 </main><footer><span>© 2026 App Kaa Baap</span><span>Independent discovery · Transparent recommendations</span></footer>
-<script src="auth-config.js"></script><script src="apps.js"></script><script src="app.js"></script><script type="module" src="auth.js"></script>
+<script src="auth-config.js"></script><script src="apps.js"></script><script src="app.js"></script><script type="module" src="auth.js"></script><script type="module" src="profile.js"></script>
 </body></html>
