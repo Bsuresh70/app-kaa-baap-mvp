@@ -75,6 +75,7 @@ if (config.supabaseUrl && config.supabaseAnonKey) {
   const { data } = await supabase.auth.getSession();
   await loadProfile(data.session?.user || null);
   supabase.auth.onAuthStateChange((_event, session) => {
-    loadProfile(session?.user || null);
+    // Defer profile queries until Supabase has released its auth-state lock.
+    queueMicrotask(() => loadProfile(session?.user || null));
   });
 }
