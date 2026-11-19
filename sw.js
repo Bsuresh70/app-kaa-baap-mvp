@@ -1,5 +1,5 @@
 const CACHE_NAME = "app-kaa-baap-shell-v1";
-const APP_SHELL = ["/", "/index.html", "/styles.css", "/apps.js", "/app.js", "/auth-config.js", "/manifest.webmanifest", "/offline.html", "/icons/app-kaa-baap.svg"];
+const APP_SHELL = ["/", "/index.html", "/styles.css", "/apps.js", "/app.js", "/auth-config.js", "/auth.js", "/manifest.webmanifest", "/offline.html", "/icons/app-kaa-baap.svg"];
 
 self.addEventListener("install", event => {
   event.waitUntil(
