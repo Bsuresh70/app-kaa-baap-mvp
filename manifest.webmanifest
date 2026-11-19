@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "App Kaa Baap",
+  "short_name": "App Kaa Baap",
+  "description": "Every App. One Intelligent Gateway. Discover the right app for your task.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "categories": [
+    "productivity",
+    "utilities",
+    "education"
+  ],
+  "icons": [
+    {
+      "src": "/icons/app-kaa-baap.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
