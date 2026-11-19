@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020">
 <meta name="description" content="App Kaa Baap helps you discover apps for what you need to do.">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/app-kaa-baap.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/app-kaa-baap.svg">
 <title>App Kaa Baap — Every App. One Intelligent Gateway.</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -35,4 +39,11 @@
 <section class="developer"><div><p class="eyebrow">FOR APP DEVELOPERS</p><h2>Help people discover your app.</h2><p>Submit an app for review and help us build a useful, trustworthy catalogue.</p></div><form id="devForm"><input required placeholder="App name" aria-label="App name"><input required type="url" placeholder="Official website URL" aria-label="Official website URL"><input required type="email" placeholder="Contact email" aria-label="Contact email"><button type="submit">Prepare submission</button><p id="devMsg" class="formmsg" role="status"></p></form></section>
 </main><footer><span>© 2026 App Kaa Baap</span><span>Independent discovery · Transparent recommendations</span></footer>
 <script src="auth-config.js"></script><script src="apps.js"></script><script src="app.js"></script><script type="module" src="auth.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(error => console.warn("PWA service worker registration failed:", error));
+  });
+}
+</script>
 </body></html>
